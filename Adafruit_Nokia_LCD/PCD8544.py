@@ -45,7 +45,7 @@ PCD8544_SETVOP = 0x80
 
 
 class PCD8544(object):
-	"""Nokia 5110/3110 PCD8544-based LCD display."""
+	"""Nokia 5110/3310 PCD8544-based LCD display."""
 
 	def __init__(self, dc, rst, sclk=None, din=None, cs=None, gpio=None, spi=None):
 		self._sclk = sclk
