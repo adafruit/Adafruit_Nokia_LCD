@@ -3,7 +3,7 @@ Adafruit Nokia LCD
 
 Python library for the using the Nokia 5110/3310 monochrome graphic LCD with a Raspberry Pi or Beaglebone Black.
 
-Designed specifically to work with the Adafruit Nokia 5110/3110 LCD ----> https://www.adafruit.com/products/338
+Designed specifically to work with the Adafruit Nokia 5110/3310 LCD ----> https://www.adafruit.com/products/338
 
 This library depends on the following other libraries:
 
