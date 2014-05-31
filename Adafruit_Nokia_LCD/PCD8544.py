@@ -145,14 +145,17 @@ class PCD8544(object):
 			raise ValueError('Image must be in mode 1.')
 		index = 0
 		# Iterate through the 6 y axis rows.
+		# Grab all the pixels from the image, faster than getpixel.
+		pix = image.load()
 		for row in range(6):
 			# Iterate through all 83 x axis columns.
 			for x in range(84):
 				# Set the bits for the column of pixels at the current position.
 				bits = 0
-				for bit in range(8):
+				# Don't use range here as it's a bit slow
+				for bit in [0, 1, 2, 3, 4, 5, 6, 7]:
 					bits = bits << 1
-					bits |= 1 if image.getpixel((x, row*ROWPIXELS+7-bit)) == 0 else 0
+					bits |= 1 if pix[(x, row*ROWPIXELS+7-bit)] == 0 else 0
 				# Update buffer byte and increment to next byte.
 				self._buffer[index] = bits
 				index += 1
