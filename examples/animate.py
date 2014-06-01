@@ -106,4 +106,4 @@ while True:
 	if pos < -maxwidth:
 		pos = startpos
 	# Pause briefly before drawing next frame.
-	time.sleep(0.01)
+	time.sleep(0.1)
