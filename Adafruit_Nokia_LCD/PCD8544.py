@@ -60,6 +60,11 @@ class PCD8544(object):
 			self._gpio = GPIO.get_platform_gpio()
 		if self._rst is not None:
 			self._gpio.setup(self._rst, GPIO.OUT)
+		# Default to bit bang SPI.
+		if self._spi is None:
+			self._spi = SPI.BitBang(self._gpio, self._sclk, self._din, None, self._cs)
+		# Set pin outputs.
+		self._gpio.setup(self._dc, GPIO.OUT)
 		# Initialize buffer to Adafruit logo.
 		self._buffer = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -117,11 +122,6 @@ class PCD8544(object):
 
 	def begin(self, contrast=40, bias=4):
 		"""Initialize display."""
-		# Default to bit bang SPI.
-		if self._spi is None:
-			self._spi = SPI.BitBang(self._gpio, self._sclk, self._din, None, self._cs)
-		# Set pin outputs.
-		self._gpio.setup(self._dc, GPIO.OUT)
 		self.reset()
 		# Set LCD bias.
 		self.set_bias(bias)
