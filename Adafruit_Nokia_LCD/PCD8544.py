@@ -173,5 +173,5 @@ class PCD8544(object):
 		"""Set contrast to specified value (should be 0-127)."""
 		contrast = max(0, min(contrast, 0x7f)) # Clamp to values 0-0x7f
 		self.command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION)
-		self.command(PCD8544_SETVOP | constrast)
+		self.command(PCD8544_SETVOP | contrast)
 		self.command(PCD8544_FUNCTIONSET)
