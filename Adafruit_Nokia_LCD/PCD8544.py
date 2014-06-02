@@ -100,6 +100,15 @@ class PCD8544(object):
 		self._gpio.set_low(self._dc)
 		self._spi.write([c])
 
+	def extended_command(self, c):
+		"""Send a command in extended mode"""
+		# Set extended command mode
+		self.command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION)
+		self.command(c)
+		# Set normal display mode.
+		self.command(PCD8544_FUNCTIONSET)
+		self.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL)
+
 	def data(self, c):
 		"""Send byte of data to display."""
 		# DC pin high signals data byte.
@@ -114,16 +123,11 @@ class PCD8544(object):
 		# Set pin outputs.
 		self._gpio.setup(self._dc, GPIO.OUT)
 		self.reset()
-		# Enter extended mode commands.
-		self.command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION)
 		# Set LCD bias.
-		self.command(PCD8544_SETBIAS | bias)
+		self.extended_command(PCD8544_SETBIAS | bias)
 		# Set contrast.
 		contrast = max(0, min(contrast, 0x7f)) # Clamp to values 0-0x7f
-		self.command(PCD8544_SETVOP | contrast)
-		# Set normal display mode.
-		self.command(PCD8544_FUNCTIONSET)
-		self.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL)
+		self.extended_command(PCD8544_SETVOP | contrast)
 
 	def reset(self):
 		"""Reset the display"""
@@ -172,6 +176,4 @@ class PCD8544(object):
 	def set_contrast(self, contrast):
 		"""Set contrast to specified value (should be 0-127)."""
 		contrast = max(0, min(contrast, 0x7f)) # Clamp to values 0-0x7f
-		self.command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION)
-		self.command(PCD8544_SETVOP | contrast)
-		self.command(PCD8544_FUNCTIONSET)
+		self.extended_command(PCD8544_SETVOP | contrast)
