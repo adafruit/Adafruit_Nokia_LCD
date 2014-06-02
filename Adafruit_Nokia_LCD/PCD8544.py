@@ -55,6 +55,11 @@ class PCD8544(object):
 		self._rst = rst
 		self._gpio = gpio
 		self._spi = spi
+		# Default to detecting platform GPIO.
+		if self._gpio is None:
+			self._gpio = GPIO.get_platform_gpio()
+		if self._rst is not None:
+			self._gpio.setup(self._rst, GPIO.OUT)
 		# Initialize buffer to Adafruit logo.
 		self._buffer = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -103,20 +108,12 @@ class PCD8544(object):
 
 	def begin(self, contrast=40, bias=4):
 		"""Initialize display."""
-		# Default to detecting platform GPIO.
-		if self._gpio is None:
-			self._gpio = GPIO.get_platform_gpio()
 		# Default to bit bang SPI.
 		if self._spi is None:
 			self._spi = SPI.BitBang(self._gpio, self._sclk, self._din, None, self._cs)
 		# Set pin outputs.
 		self._gpio.setup(self._dc, GPIO.OUT)
-		if self._rst is not None:
-			self._gpio.setup(self._rst, GPIO.OUT)
-			# Toggle RST low to reset.
-			self._gpio.set_low(self._rst)
-			time.sleep(0.1)
-			self._gpio.set_high(self._rst)
+		self.reset()
 		# Enter extended mode commands.
 		self.command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION)
 		# Set LCD bias.
@@ -127,6 +124,14 @@ class PCD8544(object):
 		# Set normal display mode.
 		self.command(PCD8544_FUNCTIONSET)
 		self.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL)
+
+	def reset(self):
+		"""Reset the display"""
+		if self._rst is not None:
+			# Toggle RST low to reset.
+			self._gpio.set_low(self._rst)
+			time.sleep(0.1)
+			self._gpio.set_high(self._rst)
 
 	def display(self):
 		"""Write display buffer to physical display."""
