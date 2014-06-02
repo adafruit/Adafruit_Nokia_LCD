@@ -124,10 +124,8 @@ class PCD8544(object):
 		self._gpio.setup(self._dc, GPIO.OUT)
 		self.reset()
 		# Set LCD bias.
-		self.extended_command(PCD8544_SETBIAS | bias)
-		# Set contrast.
-		contrast = max(0, min(contrast, 0x7f)) # Clamp to values 0-0x7f
-		self.extended_command(PCD8544_SETVOP | contrast)
+		self.set_bias(bias)
+		self.set_contrast(contrast)
 
 	def reset(self):
 		"""Reset the display"""
@@ -177,3 +175,7 @@ class PCD8544(object):
 		"""Set contrast to specified value (should be 0-127)."""
 		contrast = max(0, min(contrast, 0x7f)) # Clamp to values 0-0x7f
 		self.extended_command(PCD8544_SETVOP | contrast)
+
+	def set_bias(self, bias):
+		"""Set bias"""
+		self.extended_command(PCD8544_SETBIAS | bias)
