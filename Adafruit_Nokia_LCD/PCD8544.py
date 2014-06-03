@@ -55,6 +55,16 @@ class PCD8544(object):
 		self._rst = rst
 		self._gpio = gpio
 		self._spi = spi
+		# Default to detecting platform GPIO.
+		if self._gpio is None:
+			self._gpio = GPIO.get_platform_gpio()
+		if self._rst is not None:
+			self._gpio.setup(self._rst, GPIO.OUT)
+		# Default to bit bang SPI.
+		if self._spi is None:
+			self._spi = SPI.BitBang(self._gpio, self._sclk, self._din, None, self._cs)
+		# Set pin outputs.
+		self._gpio.setup(self._dc, GPIO.OUT)
 		# Initialize buffer to Adafruit logo.
 		self._buffer = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -88,12 +98,21 @@ class PCD8544(object):
 						0xFF, 0xFF, 0xFF, 0xFF, 0x7F, 0x7F, 0x1F, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ]
-	
+
 	def command(self, c):
 		"""Send command byte to display."""
 		# DC pin low signals command byte.
 		self._gpio.set_low(self._dc)
 		self._spi.write([c])
+
+	def extended_command(self, c):
+		"""Send a command in extended mode"""
+		# Set extended command mode
+		self.command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION)
+		self.command(c)
+		# Set normal display mode.
+		self.command(PCD8544_FUNCTIONSET)
+		self.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL)
 
 	def data(self, c):
 		"""Send byte of data to display."""
@@ -103,30 +122,18 @@ class PCD8544(object):
 
 	def begin(self, contrast=40, bias=4):
 		"""Initialize display."""
-		# Default to detecting platform GPIO.
-		if self._gpio is None:
-			self._gpio = GPIO.get_platform_gpio()
-		# Default to bit bang SPI.
-		if self._spi is None:
-			self._spi = SPI.BitBang(self._gpio, self._sclk, self._din, None, self._cs)
-		# Set pin outputs.
-		self._gpio.setup(self._dc, GPIO.OUT)
+		self.reset()
+		# Set LCD bias.
+		self.set_bias(bias)
+		self.set_contrast(contrast)
+
+	def reset(self):
+		"""Reset the display"""
 		if self._rst is not None:
-			self._gpio.setup(self._rst, GPIO.OUT)
 			# Toggle RST low to reset.
 			self._gpio.set_low(self._rst)
 			time.sleep(0.1)
 			self._gpio.set_high(self._rst)
-		# Enter extended mode commands.
-		self.command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION)
-		# Set LCD bias.
-		self.command(PCD8544_SETBIAS | bias)
-		# Set contrast.
-		contrast = max(0, min(contrast, 0x7f)) # Clamp to values 0-0x7f
-		self.command(PCD8544_SETVOP | contrast)
-		# Set normal display mode.
-		self.command(PCD8544_FUNCTIONSET)
-		self.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL)
 
 	def display(self):
 		"""Write display buffer to physical display."""
@@ -167,6 +174,8 @@ class PCD8544(object):
 	def set_contrast(self, contrast):
 		"""Set contrast to specified value (should be 0-127)."""
 		contrast = max(0, min(contrast, 0x7f)) # Clamp to values 0-0x7f
-		self.command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION)
-		self.command(PCD8544_SETVOP | constrast) 
-		self.command(PCD8544_FUNCTIONSET)
+		self.extended_command(PCD8544_SETVOP | contrast)
+
+	def set_bias(self, bias):
+		"""Set bias"""
+		self.extended_command(PCD8544_SETBIAS | bias)
