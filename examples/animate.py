@@ -75,35 +75,35 @@ startpos = 83
 pos = startpos
 
 # Animate text moving in sine wave.
-print 'Press Ctrl-C to quit.'
+print('Press Ctrl-C to quit.')
 while True:
-	# Clear image buffer.
-	draw.rectangle((0,0,83,47), outline=255, fill=255)
-	# Enumerate characters and draw them offset vertically based on a sine wave.
-	x = pos
-	for i, c in enumerate(text):
-		# Stop drawing if off the right side of screen.
-		if x > 83:
-			break
-		# Calculate width but skip drawing if off the left side of screen.
-		if x < -10:
-			width, height = draw.textsize(c, font=font)
-			x += width
-			continue
-		# Calculate offset from sine wave.
-		y = (24-8)+math.floor(10.0*math.sin(x/83.0*2.0*math.pi))
-		# Draw text.
-		draw.text((x, y), c, font=font, fill=0)
-		# Increment x position based on chacacter width.
-		width, height = draw.textsize(c, font=font)
-		x += width
-	# Draw the image buffer.
-	disp.image(image)
-	disp.display()
-	# Move position for next frame.
-	pos -= 2
-	# Start over if text has scrolled completely off left side of screen.
-	if pos < -maxwidth:
-		pos = startpos
-	# Pause briefly before drawing next frame.
-	time.sleep(0.1)
+    # Clear image buffer.
+    draw.rectangle((0,0,83,47), outline=255, fill=255)
+    # Enumerate characters and draw them offset vertically based on a sine wave.
+    x = pos
+    for i, c in enumerate(text):
+        # Stop drawing if off the right side of screen.
+        if x > 83:
+            break
+        # Calculate width but skip drawing if off the left side of screen.
+        if x < -10:
+            width, height = draw.textsize(c, font=font)
+            x += width
+            continue
+        # Calculate offset from sine wave.
+        y = (24-8)+math.floor(10.0*math.sin(x/83.0*2.0*math.pi))
+        # Draw text.
+        draw.text((x, y), c, font=font, fill=0)
+        # Increment x position based on chacacter width.
+        width, height = draw.textsize(c, font=font)
+        x += width
+        # Draw the image buffer.
+        disp.image(image)
+        disp.display()
+        # Move position for next frame.
+        pos -= 2
+        # Start over if text has scrolled completely off left side of screen.
+        if pos < -maxwidth:
+            pos = startpos
+    # Pause briefly before drawing next frame.
+    time.sleep(0.1)

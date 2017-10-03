@@ -77,6 +77,6 @@ image = Image.open('happycat_lcd.ppm').convert('1')
 disp.image(image)
 disp.display()
 
-print 'Press Ctrl-C to quit.'
+print('Press Ctrl-C to quit.')
 while True:
-	time.sleep(1.0)
+    time.sleep(1.0)
